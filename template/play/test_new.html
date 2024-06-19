@@ -1,0 +1,172 @@
+{% extends "base_test.html" %}
+
+{% block content %}
+<style>
+    .left {
+        text-align: left;
+    }
+    .form-check-label {
+        cursor: pointer;
+    }
+    .form-check-input {
+        cursor: pointer;
+    }
+    .istruction_text{
+        text-align: justify;
+    }
+</style>
+
+<h3><div hidden id="limit">{{limit}}</div></h3>
+<h3><div hidden id="timer_hidden">{{timer}}</div></h3>
+<h3><div hidden id="count_hidden">{{count}}</div></h3>
+
+<h3><div hidden id="show_2" class="display_time"></div></h3>
+<h3><div id="timer" class="display_time"></div></h3>
+
+<div id="myProgress">
+    <div id="myBar"></div>
+</div>
+<h3><span id="count"></span></h3>
+
+<div class="jumbotron my-4">
+	<span hidden id="test_id">{{id}}</span>
+
+	<h2><p><span id="istruction">Правила проведения экзамена</span></p></h2>
+
+    <div class="row g-3" id="istruction_text">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <p class="istruction_text">
+                <span>
+                    Пользователь обязан ознакомиться с данными правилами проведения экзамена.
+                    <br>Пользователь обязуется, что под своими учетными данными экзамен проходит именно он.
+                    <br>Пользователь не имеет права предоставлять доступ к своему личному кабинету сторонним лицам.
+                    <br>Пользователь не имеет права привлекать помощь третьих лиц во время тестирования.
+                    <br>Пользователь не имеет права во время тестирования вступать в разговоры с третьими лицами, использовать справочные материалы, представленные на различных видах носителей.
+                    <br>Для обеспечения корректной работы не рекомендуется использовать браузер Internet Explorer.
+                    <br><br>Количество вопросов в данном экзамене: {{limit}}
+                    <br>Ограничение по времени на каждый вопрос: {{timer}} сек
+		    <br>При завершении времени текущего вопроса Вы будете автоматически перенаправлены на следующий вопрос.
+                    <br>Каждый вопрос оценивается в 1 балл.
+                    <br>Минимальное количество баллов необходимое для успешной сдачи экзамена: {{done_score}}
+		    <br>В случае успешной сдачи экзамен становится закрытым для повторного прохождения.
+                    <br>В случае неуспешной сдачи экзамен становится закрытым на 24 часа. Через 24 часа экзамен автоматически становится доступным для повторного прохождения.
+                    <br>Для прохождения данного экзамена предоставляется 3 попытки. В случае, если все 3 попытки оказались неуспешными, экзамен становится закрытым для повторного прохождения, и может быть открыт только администратором.
+                </span>
+            </p>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+
+    <div class="mb-3 form-check" id="agree">
+        <input type="checkbox" class="form-check-input" id="agree_form" name="agree_form" value="agree_form" onclick="display_element()">
+        <label class="form-check-label" for="agree_form">Подтверждение о прочтении инструкции</label>
+    </div>
+
+    <h3 class="left"><p><ul id="list_question"></ul></p></h3>
+    <p><ul class="left" id="several_answers"></ul></p>
+    <h3></h3>
+
+    <form class="left" method="POST" id="addForm">
+        {% csrf_token %}
+        <p><ul id="list_answer"></ul></p>
+        <p><ul hidden id="question_id"></ul></p>
+        <button type="submit" class="btn_one" id="getTodos">Дальше</button>
+    </form>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+<script type="text/javascript">
+    document.ondragstart = noselect;
+    document.onselectstart = noselect;
+    document.oncontextmenu = noselect;
+    function noselect() {return false;}
+</script>
+
+<script>
+     document.getElementById("getTodos").style.display = "none";
+     function display_element() {
+        var element = document.getElementById("getTodos").style.display;
+        if (element == "none") {
+            document.getElementById("getTodos").style.display = ''
+        } else {
+            document.getElementById("getTodos").style.display = 'none'
+        }
+     }
+
+    (function() {
+        console.log("ready!");
+        
+        const allTodosUrl = "/HomeUser/test/" + document.getElementById("test_id").textContent + "/";
+        const readButton = document.getElementById("getTodos");
+        let counter = setInterval(1000000);
+        var time_all = document.getElementById("timer_hidden").innerHTML;
+	var width = document.getElementById("count_hidden").innerHTML;
+	var all_question = document.getElementById("limit").innerHTML;
+
+        function timerID() {
+            let time = document.getElementById("show_2").innerHTML;
+            time = time - 1;
+            if(time <= 0){
+                clearInterval(counter)
+		readButton.click()
+            } else {
+                document.getElementById("show_2").innerHTML = time;
+                if (time <= 9) {
+                    document.getElementById("timer").textContent = '00:0' + time;
+                } else {
+                    document.getElementById("timer").textContent = '00:' + time;
+                }
+            }
+        }
+        
+        readButton.addEventListener("click", () => {
+
+            var elem = document.getElementById("myBar");
+            width++;
+            width_per = width * 100 / all_question
+            if (width_per <= 100) {
+                elem.style.width = width_per + "%";
+                document.getElementById("myBar").textContent = width_per.toFixed(1) + "%";
+	    
+          document.getElementById('count').innerHTML = width + ' из ' + all_question;
+        }
+
+        document.getElementById("istruction").style.display = "none";
+        document.getElementById("istruction_text").style.display = "none";
+	document.getElementById("agree").style.display = "none";
+  
+        getAllTodos(allTodosUrl);
+  
+        document.getElementById('show_2').innerHTML = time_all;
+        document.getElementById('timer').textContent = '00:' + time_all;
+        clearInterval(counter)
+        counter = setInterval(timerID, 1000);
+    });
+    
+    const addTodoForm = document.getElementById("addForm");
+    addTodoForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        let answers_values = []
+        let answers_checked = []
+        let question_id = []
+
+        for (let i=1; i<(addTodoForm.elements).length-1; i++) {
+            question_id.push(addTodoForm.elements[i].name)
+            answers_values.push(addTodoForm.elements[i].value)
+            answers_checked.push(addTodoForm.elements[i].checked)
+        }
+
+        const formData = {
+            question_id: question_id,
+            values: answers_values,
+            checked: answers_checked,
+        }
+
+        addTodo(allTodosUrl, formData);
+        addTodoForm.reset();
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="container">
+	
+	<div class="jumbotron my-4">
+		<h3 class="text-info">{{who_answered.question.text|safe}}</h3>
+		<p>
+			<strong>Ваш ответ:</strong>
+			{{who_answered.answer.text|safe}}
+		</p>
+
+
+	{% if who_answered.answer.correct %}
+		<h4 class="text-success">Правильный ответ</h4>
+	{% else %}
+		<h4 class="text-danger">Неправильный ответ</h4>
+
+		{% for answer in who_answered.question.choices.all %}
+
+			{% if answer.correct %}
+
+				<h4>Правильный ответ: <span class="text-success">{{answer}}</span></h4>
+				
+			{% endif %}
+
+		{% endfor %}
+
+	{% endif %}
+
+	<a href="{% url 'test' %}">
+		<button class="btn-success">
+			Следующий вопрос
+		</button>
+	</a>
+
+	</div>
+
+
+</div>
+
+
+{% endblock %}

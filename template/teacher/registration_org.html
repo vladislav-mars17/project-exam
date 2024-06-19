@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Экзамен{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.bootstrap5.min.css" integrity="sha512-Ars0BmSwpsUJnWMw+KoUKGKunT7+T8NGK0ORRKj+HT8naZzLSIQoOSIIM3oyaJljgLxFi0xImI5oZkAWEFARSA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    {% load static %}
+	<link rel="stylesheet" type="text/css" href="{% static 'project_exam/style.css' %}" />
+</head>
+
+<style>
+    footer {
+        position: fixed;
+    }
+    header {
+        width: 100%;
+        background-color: rgb(16, 76, 155);
+        padding: 20px 0;
+    }
+</style>
+
+<body>
+    <div id="wrapper" class="wrapper">
+        <header class="p-3 text">
+            <div class="container-fluid d-grid gap-3 align-items-center">
+                <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                    <a class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                        <img src="{% static 'project_exam/include/' %}" width="60" height="60">
+                    </a>
+                    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                        <a class="nav-link px-4 text-white">Экзамен</a>
+                    </ul>
+                    <div class="text-end">
+                        <a class="btn btn-outline-light me-2" href="{% url 'login' %}">Войти</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+		<aside></aside>
+		<section class="py-5 text container">
+            <div class="content">
+
+                <h1 class="text-center my-4">Регистрация представителя организации</h1>
+
+                <div class="modal-body p-5 pt-0">
+                    <form method="POST" id="myForm">
+
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            {{form.last_name}}
+                            <label for="">Фамилия</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{form.first_name}}
+                            <label for="">Имя / Имя и Отчество</label>
+                        </div>
+                        <div class="form-floating mb-3" name="login">
+                            {{form.username}}          
+                            {% if error_type == 'username' %}
+                                <label for="" class="valid" style="color: red;">Email. {{error_text}}</label>
+                            {% else %}
+                                <label for="">Email</label>
+                            {% endif %}
+                            <div class="form-text">На указанный email придет уведомление о регистрации с учетными данными</div>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <select name="organization" class="form-control form-select" aria-label=".form-select-lg example" id="organization">
+                                <option value=""></option>
+                                {% for organization in organizations %}
+                                    <option value="{{organization.id}}">{{organization.name}}</option>
+                                {% endfor %}
+                            </select>
+
+                            {% if organization_valid %}
+                                <label for="">Организация</label>
+                            {% else %}
+                                <label for="" class="valid" style="color: red;">Организация не выбрана</label>
+                            {% endif %}    
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            {{form.password1}}
+                            {% if error_type == 'password' %}
+                                <label for="" class="valid" style="color: red;">Пароль. {{error_text}}</label>
+                            {% else %}
+                                <label for="">Пароль</label>
+                            {% endif %}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{form.password2}}
+                            <label for="">Подтвердите пароль</label>
+                        </div>
+                    </form>
+                    <button id="myBtn" class="btn_three" type="submit" form="myForm" onclick="myFunction()">Зарегистрироваться</button>
+                </div>
+ 
+            </div>
+        </section>
+
+        <footer class="py-3 my-4">
+            <ul class="nav justify-content border-bottom pb-3 mb-3"></ul>
+            <p class="text-center text-muted">Экзамен</p>
+        </footer>
+	</div>
+</body>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js" integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(function(){
+        $("#organization").selectize({respect_word_boundaries: false,});
+    }); 
+</script>
+</html>

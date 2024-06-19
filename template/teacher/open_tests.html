@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Экзамен
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	
+	<h1 class="text-center my-4"> 
+			Доступ к тестам
+	</h1>
+
+	<div class="row g-3">
+		<div class="col-md-4">
+			<input class="form-control" type="text" id="name_org" onkeyup="search(1, 'name_org')" placeholder="Организация" title="Type in a name">
+		</div>
+		<div class="col-md-4">
+			<input class="form-control" type="text" id="text" onkeyup="search(2, 'text')" placeholder="Группа" title="Type in a name">
+		</div>
+		<div class="col-md-4">
+			<input class="form-control" type="text" id="name" onkeyup="search(3, 'name')" placeholder="Экзаменуемый" title="Type in a name">
+		</div>
+	</div>
+
+	<h1 class="text-center my-4"></h1>
+
+	<table class="table table-striped table-bodered" id="myTable">
+		<thead>
+			
+			<tr>
+				<th>№</th>
+				<th>Организация</th>
+				<th>Группа</th>
+				<th>Экзаменуемый</th>
+				<th>Пройденные тесты</th>
+				<th>Доступ</th>
+			</tr>
+			
+		</thead>
+		<tbody>
+			{% for test in available_tests %}
+				<tr>
+                    <td>{{forloop.counter}}</td>
+		    <td>{{test.user_id.user_organization.organization_id.name}}</td>
+                    <td>{{test.user_id.user_role.role_id.text}}</td>	
+                    <td>{{test.user_id.last_name}} {{test.user_id.first_name}}</td>	
+                    <td>{{test.unavailable_tests.text}}</td>		
+                    <td><a href="delete_unavailable_tests/{{test.id}}">Открыть</a></td>		
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+</div>
+
+<h1 class="text-center my-4"></h1>
+
+<span class="step-links">
+	<ul class="pagination justify-content-center">
+		{% if page_obj.has_previous %}
+			<li class="page-item">
+				<a href="?page=1" class="page-link">&laquo;</a>
+			</li>
+			<li class="page-item">
+				<a href="?page={{ page_obj.previous_page_number }}" class="page-link">&#8249;</a>
+			</li>
+		{% endif %}
+		<span class="current">
+			<li class="page-item">
+				<a class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</a>
+			</li>
+			<div hidden id="page">{{ page_obj.number }}</div>
+		</span>
+		{% if page_obj.has_next %}
+		<li class="page-item">
+			<a href="?page={{ page_obj.next_page_number }}" class="page-link">&#8250;</a>
+		</li>
+		<li class="page-item">
+			<a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a>
+		</li>
+		{% endif %}
+	</ul>
+</span>
+
+<script> 
+	var table, td;
+	var number_page = document.getElementById("page").textContent;
+	var start_index = 15 * (number_page - 1) + 1;
+	var end_index = 15 * number_page;
+
+	table = document.getElementById("myTable");
+	tr = table.getElementsByTagName("tr");
+	for (i = 0; i < tr.length; i++) {
+		if (i >= start_index && i <= end_index) {
+			tr[i].style.display = "";
+		} else {
+			tr[i].style.display = "none";
+			tr[0].style.display = "";
+		}
+	}
+
+	var count_func = 0
+	
+	function search(col, element_id) {
+		count_func = count_func + 1
+		var input, filter, table, tr, td, i, txtValue;
+		input = document.getElementById(element_id);
+		filter = input.value.toUpperCase();
+		table = document.getElementById("myTable");
+		tr = table.getElementsByTagName("tr");
+		for (i = 0; i < tr.length; i++) {
+			td = tr[i].getElementsByTagName("td")[col];
+			if (td) {
+				if (count_func > 1) {
+					if (tr[i].style.display != "none") {
+						txtValue = td.textContent || td.innerText;
+						if (txtValue.toUpperCase().indexOf(filter) > -1) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+						}
+					}
+				} else {
+					txtValue = td.textContent || td.innerText;
+					if (txtValue.toUpperCase().indexOf(filter) > -1) {
+						tr[i].style.display = "";
+					} else {
+						tr[i].style.display = "none";
+					}
+				}
+				if (filter == "") {
+					count_func = 0
+					for (i = 0; i < tr.length; i++) {
+						if (i >= start_index && i <= end_index) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+							tr[0].style.display = "";
+						}
+					}
+				}
+			}
+		}
+	}
+</script>
+
+{% endblock %}

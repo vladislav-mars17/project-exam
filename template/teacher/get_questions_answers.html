@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'project_exam/style.css' %}" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<h1 class="text-center my-4">
+			{{tests_name.text}}
+	</h1>
+
+    <div class="row g-5">
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
+            <input class="form-control" type="text" id="question_search" onkeyup="search(1, 'question_search')" placeholder="Вопрос" title="Type in a name">
+        </div>
+        <div class="col-md-4">
+			<button id="myBtn" class="btn_four">Добавить новый вопрос</button>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+    <h1 class="text-center my-4"></h1>
+
+    <table class="table table-striped table-bodered" id="myTable">
+		<thead>
+			<tr>
+				<th>№</th>
+				<th>Вопросы</th>
+				<th>Изменить</th>
+				<th>Удалить</th>
+			</tr>	
+		</thead>
+		<tbody>
+			{% for question_name in questions_name %}
+				<tr>
+					<td>{{forloop.counter}}</td>
+					<td>
+                        <div class="accordion-item">
+                            <h4 class="accordion-header" id="heading{{question_name.id}}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{question_name.id}}" aria-expanded="false" aria-controls="collapse{{question_name.id}}">
+                                    {{question_name.text}}
+                                </button>
+                            </h4>
+                            <div id="collapse{{question_name.id}}" class="accordion-collapse collapse" aria-labelledby="heading{{question_name.id}}" data-bs-parent="#accordion{{question_name.id}}">
+                                 <div class="accordion-body">
+                                    {% for answer_name in answers_name %}
+                                        {% if question_name.id == answer_name.question_id %}
+                                            <p>
+                                                {{answer_name.text}}
+                                            </p>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+					<td>
+                        <button class="btn_one" onclick="window.location.href='/edit_questions/{{question_name.id}}'">Изменить</button>
+                    </td>
+					<td>
+                        <button class="btn_one" onclick="window.location.href='/delete_question_answers/{{question_name.id}}'">Удалить</button>
+                    </td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+<div id="myModal" class="modal">
+    <div id="myModal" class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header p-7 pb-4 border-bottom-0">
+                <h3>Форма регистрации новых вопросов и ответов</h3>
+                <button id="close" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-5 pt-0">
+                <form method="POST" id="myForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <p><label class="form-label">Вопрос</label></p>
+                        <p><input type="text" class="form-control" name="question" value=""></p>
+
+                        <label class="form-label">Введите количество баллов за вопрос</label>
+                        <p><input type="text" class="form-control" name="max_score" value=""></p>
+
+                        <label class="form-label">Ответы</label>
+                        <p><label class="form-label">Поставьте галочки у правильных вариантов</label></p>
+
+                        <ul id="list_answer" name="list_answer"></ul>
+                    </div>
+                </form>
+                <button id="next_answer" class="btn_two" onclick="answers()">Добавить вариант</button>
+                <p><input class="btn_two" type="submit" value="Сохранить" form="myForm"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<span class="step-links">
+	<ul class="pagination justify-content-center">
+		{% if page_obj.has_previous %}
+			<li class="page-item">
+				<a href="?page=1" class="page-link">&laquo;</a>
+			</li>
+			<li class="page-item">
+				<a href="?page={{ page_obj.previous_page_number }}" class="page-link">&#8249;</a>
+			</li>
+		{% endif %}
+		<span class="current">
+			<li class="page-item">
+				<a class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</a>
+			</li>
+			<div hidden id="page">{{ page_obj.number }}</div>
+		</span>
+		{% if page_obj.has_next %}
+		<li class="page-item">
+			<a href="?page={{ page_obj.next_page_number }}" class="page-link">&#8250;</a>
+		</li>
+		<li class="page-item">
+			<a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a>
+		</li>
+		{% endif %}
+	</ul>
+</span>
+
+<script>
+    var count_answer = 0
+
+    function answers() {
+        count_answer = count_answer + 1;
+
+        let div = document.createElement("div");
+        div.setAttribute("class", "mb-3 form-check");
+
+        let check_input = document.createElement("input");
+        check_input.setAttribute("type", "checkbox");
+        check_input.setAttribute("class", "form-check-input");
+        check_input.setAttribute("name", "correct_answer" + count_answer);
+
+        let text_input = document.createElement("input");
+        text_input.setAttribute("type", "text");
+        text_input.setAttribute("class", "form-control");
+        text_input.setAttribute("name", "answer" + count_answer);
+
+        div.appendChild(check_input);
+        div.appendChild(text_input);
+
+        document.getElementById("list_answer").appendChild(div); 
+    }
+
+    var modal = document.getElementById("myModal");
+    var btn = document.getElementById("myBtn");
+    var span = document.getElementById("close");
+
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    span.onclick = function() {
+        modal.style.display = "none";
+        window.location.reload();
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+
+<script> 
+	var table, td;
+	var number_page = document.getElementById("page").textContent;
+	var start_index = 15 * (number_page - 1) + 1;
+	var end_index = 15 * number_page;
+
+	table = document.getElementById("myTable");
+	tr = table.getElementsByTagName("tr");
+	for (i = 0; i < tr.length; i++) {
+		if (i >= start_index && i <= end_index) {
+			tr[i].style.display = "";
+		} else {
+			tr[i].style.display = "none";
+			tr[0].style.display = "";
+		}
+	}
+
+	var count_func = 0
+	
+	function search(col, element_id) {
+		count_func = count_func + 1
+		var input, filter, table, tr, td, i, txtValue;
+		input = document.getElementById(element_id);
+		filter = input.value.toUpperCase();
+		table = document.getElementById("myTable");
+		tr = table.getElementsByTagName("tr");
+		for (i = 0; i < tr.length; i++) {
+			td = tr[i].getElementsByTagName("td")[col];
+			if (td) {
+				if (count_func > 1) {
+					if (tr[i].style.display != "none") {
+						txtValue = td.textContent || td.innerText;
+						if (txtValue.toUpperCase().indexOf(filter) > -1) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+						}
+					}
+				} else {
+					txtValue = td.textContent || td.innerText;
+					if (txtValue.toUpperCase().indexOf(filter) > -1) {
+						tr[i].style.display = "";
+					} else {
+						tr[i].style.display = "none";
+					}
+				}
+
+				if (filter == "") {
+					count_func = 0
+					for (i = 0; i < tr.length; i++) {
+						if (i >= start_index && i <= end_index) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+							tr[0].style.display = "";
+						}
+					}
+				}
+			}
+		}
+	}
+</script>
+
+{% endblock %}
+
+

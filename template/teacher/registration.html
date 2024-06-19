@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}
+Экзамен
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .form-text {
+        text-align: left;
+    }
+    #snackbar {
+        position: absolute;
+        top: 120px;
+        right: 16px;
+        font-size: 18px;
+    }
+</style>
+
+<h1 class="text-center my-4">Регистрация нового пользователя</h1>
+
+<div class="modal-body p-5 pt-0">
+
+    <form method="POST" id="myForm">
+        {% csrf_token %}
+        <div class="form-floating mb-3">
+            {{form.last_name}}
+            <label for="">Фамилия</label>
+        </div>
+        <div class="form-floating mb-3">
+            {{form.first_name}}
+            <label for="">Имя / Имя и Отчество</label>
+        </div>
+        <div class="form-floating mb-3" name="login">
+            {{form.username}}
+	    {% if error_type == 'username' %}
+            	<label for="">Логин (Email / Телефон). {{error_text}}</label>
+	    {% else %}
+	    	<label for="">Логин (Email / Телефон)</label>
+	    {% endif %}
+	    <div class="form-text">Если указан email, на него пользователю придет уведомление о регистрации с учетными данными</div>
+	    <div class="form-text">В ином случае письмо с учетными данными придет на почту представителя организации</div>
+        </div>
+
+	<div class="form-floating mb-3">
+            <select name="role" class="form-select form-select" aria-label=".form-select-lg example">
+		{% if role_default %}
+			<option value="{{role_default.id}}" selected>{{role_default.text}}</option>
+		{% else %}
+                	<option selected>Выберите группу</option>
+                	{% for role in roles %}
+                    		<option value="{{role.id}}">{{role.text}}</option>
+                	{% endfor %}
+		{% endif %}
+            </select>
+            {% if role_valid %}
+                <label for="">Группа</label>
+            {% else %}
+                <label for="" class="valid">Группа не выбрана</label>
+            {% endif %}
+        </div>
+
+	<div class="form-floating mb-3">
+            <select name="organization" class="form-select form-select" aria-label=".form-select-lg example">
+                {% if organization_default %}
+                    <option value="{{organization_default.id}}" selected>{{organization_default.name}}</option>
+                {% else %}
+                    <option selected>Выберите организацию</option>
+                    {% for organization in organizations %}
+                        <option value="{{organization.id}}">{{organization.name}}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+            {% if organization_valid %}
+                <label for="">Организация</label>
+            {% else %}
+                <label for="" class="valid">Организация не выбрана</label>
+            {% endif %}
+        </div>
+
+	<div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="re_cert" name="re_cert" onclick="display_element()" style="cursor: pointer">
+            <div class="form-text">
+                {% if reg_id_valid %}
+                    <label for="re_cert" style="cursor: pointer">Повторная аттестация</label>
+                {% else %}
+                    <label for="re_cert" class="valid" style="cursor: pointer">Повторная аттестация. Введите регистрационный номер</label>
+                {% endif %}
+            </div>
+        </div>
+    
+        <div class="form-floating mb-3" id="hidden">
+        </div>
+
+        <div class="form-floating mb-3">
+            {{form.password1}}
+	    {% if error_type == 'password' %}
+	    	<label for="">Пароль. {{error_text}}</label>
+	    {% else %}
+            	<label for="">Пароль</label>
+	    {% endif %}
+        </div>
+        <div class="form-floating mb-3">
+            {{form.password2}}
+            <label for="">Подтвердите пароль</label>
+        </div>
+     
+    </form>
+    <button id="myBtn" class="btn_three" type="submit" form="myForm" onclick="myFunction()">Зарегистрировать</button>
+
+</div>
+
+{% if result_text %}
+    {% if valid and role_valid and organization_valid %}
+        <div class="m-0 border-0 bd-example m-0 border-0" id="snackbar">
+            <div class="toast align-items-center text-bg-primary border-0 fade show" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #aff59d;">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{result_text}}
+                    </div>
+                    <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close" id="close_button"></button>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="m-0 border-0 bd-example m-0 border-0" id="snackbar">
+            <div class="toast align-items-center text-bg-primary border-0 fade show" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #faadad;">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{result_text}}
+                    </div>
+                    <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+
+<script>
+    document.getElementById("hidden").style.display = "none";
+
+    const reg_id_element = document.getElementById("hidden");
+    
+    function display_element() {
+        var element = document.getElementById("hidden").style.display;
+        if (element == "none") {
+            document.getElementById("hidden").style.display = ''
+
+            reg_id_element.innerHTML = "";
+            const reg_id_HTMLElement = `
+                <div class="form-floating mb-3" id="hidden">
+                    <input type="text" class="form-control rounded-3" id="reg_id" name="reg_id">
+		    {% if reg_id_valid %}
+		    	<label for="reg_id">Регистрационный номер</label>
+		    {% else %}
+			<label for="reg_id" class="valid">Регистрационный номер</label>
+		    {% endif %}
+                </div>`
+            reg_id_element.innerHTML += reg_id_HTMLElement;
+        } else {
+            document.getElementById("hidden").style.display = 'none'
+
+            reg_id_element.innerHTML = "";
+            const reg_id_HTMLElement = `
+                <div class="form-floating mb-3" id="hidden">
+                </div>`
+            reg_id_element.innerHTML += reg_id_HTMLElement;
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function myFunction() {
+    var x = document.getElementById("snackbar");
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+}
+</script>
+
+<script>
+    document.getElementById("close_button").onclick = function () {
+        location.href = "/registration/";
+    };
+</script>
+
+{% endblock %}

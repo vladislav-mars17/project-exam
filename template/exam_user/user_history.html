@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% load static %}
+Экзамен
+<img src="{% static 'project_exam/include/' %}">
+{% endblock %}
+
+{% block content %}
+<div class="row py-lg-5">
+	<div class="col-lg-15 col-md-20 mx-auto">
+		<div class="container">
+			<div class="row g-1"></div>
+
+			<div class="jumbotron my-4">
+				<h2>История</h2>
+				<h1 class="text-center my-4"></h1>
+				<div class="row g-5">
+					<div class="col-md-2"></div>
+					<div class="col-md-4">
+						<input class="form-control" type="text" id="test" onkeyup="search(1, 'test')" placeholder="Тест" title="Type in a name">
+					</div>
+					<div class="col-md-4">
+						<input class="form-control" type="text" id="result" onkeyup="search(3, 'result')" placeholder="Результат" title="Type in a name">
+					</div>
+					<div class="col-md-2"></div>
+				</div>
+				<h1 class="text-center my-4"></h1>
+				<table class="table table-striped table-bodered" id="myTable">
+					<thead>
+						<tr>
+							<th>№</th>
+							<th>Тест</th>
+							<th>Баллы</th>
+							<th>Результат</th>
+							<th>Дата</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for result in table_of_results %}
+							<tr>
+								<td>{{forloop.counter}}</td>
+								<td>{{result.tests.text}}</td>
+								<td>{{result.number_of_points}}</td>
+								{% if result.result %}
+									<td>Сдал</td>
+								{% else %}
+									<td>Не сдал</td>
+								{% endif %}
+								<td>{{result.test_date}}</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<span class="step-links">
+	<ul class="pagination justify-content-center">
+		{% if page_obj.has_previous %}
+			<li class="page-item">
+				<a href="?page=1" class="page-link">&laquo;</a>
+			</li>
+			<li class="page-item">
+				<a href="?page={{ page_obj.previous_page_number }}" class="page-link">&#8249;</a>
+			</li>
+		{% endif %}
+		<span class="current">
+			<li class="page-item">
+				<a class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</a>
+			</li>
+			<div hidden id="page">{{ page_obj.number }}</div>
+		</span>
+		{% if page_obj.has_next %}
+		<li class="page-item">
+			<a href="?page={{ page_obj.next_page_number }}" class="page-link">&#8250;</a>
+		</li>
+		<li class="page-item">
+			<a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a>
+		</li>
+		{% endif %}
+	</ul>
+</span>
+
+<script> 
+	var table, td;
+	var number_page = document.getElementById("page").textContent;
+	var start_index = 15 * (number_page - 1) + 1;
+	var end_index = 15 * number_page;
+
+	table = document.getElementById("myTable");
+	tr = table.getElementsByTagName("tr");
+	for (i = 0; i < tr.length; i++) {
+		if (i >= start_index && i <= end_index) {
+			tr[i].style.display = "";
+		} else {
+			tr[i].style.display = "none";
+			tr[0].style.display = "";
+		}
+	}
+
+	var count_func = 0
+	
+	function search(col, element_id) {
+		count_func = count_func + 1
+		var input, filter, table, tr, td, i, txtValue;
+		input = document.getElementById(element_id);
+		filter = input.value.toUpperCase();
+		table = document.getElementById("myTable");
+		tr = table.getElementsByTagName("tr");
+		for (i = 0; i < tr.length; i++) {
+			td = tr[i].getElementsByTagName("td")[col];
+			if (td) {
+				if (count_func > 1) {
+					if (tr[i].style.display != "none") {
+						txtValue = td.textContent || td.innerText;
+						if (txtValue.toUpperCase().indexOf(filter) > -1) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+						}
+					}
+				} else {
+					txtValue = td.textContent || td.innerText;
+					if (txtValue.toUpperCase().indexOf(filter) > -1) {
+						tr[i].style.display = "";
+					} else {
+						tr[i].style.display = "none";
+					}
+				}
+				if (filter == "") {
+					count_func = 0
+					for (i = 0; i < tr.length; i++) {
+						if (i >= start_index && i <= end_index) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+							tr[0].style.display = "";
+						}
+					}
+				}
+			}
+		}
+	}
+</script>
+{% endblock %}

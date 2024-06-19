@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Экзамен
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<h1 class="text-center my-4">
+        Выберите группу для редактирования тестов
+	</h1>
+    <div class="row g-3">
+        {% for role in roles %}
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+		<button class="btn_three" onclick="window.location.href='/get_roles/get_tests/{{role.id}}'">{{role.text}}</button>
+            </div>
+            <div class="col-md-3"></div>
+        {% endfor %}
+    </div>
+    <h1 class="text-center my-4"></h1>
+    <button id="myBtn" class="btn_five">Добавить новую группу</button>
+</div>
+
+<div id="myModal" class="modal">
+    <div id="myModal" class="modal-dialog" role="document">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header p-7 pb-4 border-bottom-0">
+                <h3>Введите название новой группы</h3>
+                <button id="close" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-5 pt-0">
+                <form method="POST">
+                    {% csrf_token %}
+                    <p><input type="text" class="form-control" name="new_role"></p>
+                    <p><h1></h1></p>
+                    <p><button class="btn_two">Добавить</button></p>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    var modal = document.getElementById("myModal");
+    var btn = document.getElementById("myBtn");
+    var span = document.getElementById("close");
+
+    btn.onclick = function() {
+      modal.style.display = "block";
+    }
+
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+</script>
+{% endblock %}

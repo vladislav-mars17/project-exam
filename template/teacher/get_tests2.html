@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Экзамен
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<h2 class="text-center my-4">
+        Тесты группы {{role}}
+	</h2>
+    <div class="row g-3">
+        {% for test_name in tests_name %}
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+				<button class="btn_three" onclick="window.location.href='/get_questions_answers2/{{test_name.id}}'">{{test_name.text}}</button>
+            </div>
+            <div class="col-md-3"></div>
+        {% endfor %}
+    </div>
+    <h1 class="text-center my-4"></h1>
+</div>
+
+{% endblock %}

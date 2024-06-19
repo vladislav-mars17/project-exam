@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% load static %}
+Экзамен
+<img src="{% static 'project_exam/include/' %}">
+{% endblock %}
+
+{% block content %}
+<div class="row py-lg-5">
+	<div class="col-lg-15 col-md-20 mx-auto">
+		<h1 class="fw-light">Личный кабинет пользователя</h1>
+		<h1 class="fw-light">{{user.last_name}} {{user.first_name}}</h1>
+		<div class="container">
+
+			<div class="row g-1"></div>
+
+			<div class="row g-3">
+				<div class="col-md-4">
+					<div class="jumbotron my-4">
+						<h2>Доступные тесты</h2>
+						{% if exsist_tests %}
+							<h3 class="fw-light">Выберите тест</h3>
+							<h1 class="text-center my-4"></h1>
+							{% for test_name in tests_name %}
+								<button class="btn_three" onclick="window.location.href='/HomeUser/test/{{test_name.id}}'">{{test_name.text}}</button>
+							{% endfor %}
+						{% else %}
+							<h3 class="fw-light">Доступные тесты отсутствуют</h3>
+						{% endif %}
+					</div>
+				</div>
+				<div class="col-md-4"></div>
+				<div class="col-md-4">
+					<div class="jumbotron my-4">
+						<h2>Закрытые тесты</h2>
+						{% if exsist_unavailable_tests %}
+							<h3 class="fw-light">Данные тесты вы уже прошли</h3>
+							<h1 class="text-center my-4"></h1>
+							{% for unavailable_test_name in unavailable_tests_name %}
+								<button class="btn_three_close">{{unavailable_test_name.text}}</button>
+							{% endfor %}
+						{% else %}
+							<h3 class="fw-light">Закрытые тесты отсутствуют</h3>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
